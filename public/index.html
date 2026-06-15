@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FACTNETIC — Discover the Internet's Hidden Knowledge</title>
+  <meta name="description" content="Search any topic and discover highly niche, lesser-known fun facts. Powered by Google Gemini Grounding.">
+  
+  <!-- Preconnect and Import Google Fonts: Inter and Instrument Serif (Italic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  
+  <!-- Skip link for keyboard accessibility -->
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <!-- Reactive Background Particle Canvas -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- Hero Section with Background Video -->
+  <header class="hero" role="banner">
+    <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260411_104032_69319010-2458-492b-b04d-b40a5dfa4482.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay" aria-hidden="true"></div>
+    <div class="hero-bottom-fade" aria-hidden="true"></div>
+    
+    <div class="hero-container">
+      <div class="logo">FACTNETIC</div>
+      
+      <div class="hero-content animated-entrance">
+        <h1 class="headline">Discover the Internet's <span class="serif-accent">Hidden</span> Knowledge</h1>
+        <p class="subtitle">Search any topic and uncover bizarre, niche facts sourced from across the web.</p>
+        
+        <!-- Search and Mode Controls -->
+        <form class="search-form" id="search-form" novalidate>
+          <div class="search-wrapper">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="e.g. platypus, black holes..." 
+              required 
+              minlength="2" 
+              maxlength="60" 
+              aria-label="Search topic"
+              autocomplete="off"
+            >
+            <button type="submit" class="btn-explore" id="btn-submit">Explore</button>
+          </div>
+        </form>
+
+        <div class="mode-toggles-wrapper">
+          <div class="mode-toggles" role="radiogroup" aria-label="Game Mode Toggle">
+            <label class="mode-label">
+              <input type="radio" name="app-mode" value="explore" checked aria-checked="true">
+              <span class="mode-btn"><span class="radio-indicator"></span>Explore Facts</span>
+            </label>
+            <label class="mode-label">
+              <input type="radio" name="app-mode" value="trivia" aria-checked="false">
+              <span class="mode-btn"><span class="radio-indicator"></span>Trivia Mode</span>
+            </label>
+          </div>
+        </div>
+
+        <p class="branding-footer">Powered by Gemini Search Grounding</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Display Content Area -->
+  <main id="main-content" class="content-section" tabindex="-1">
+    <div class="main-container">
+      
+      <!-- Recent Searches Chips -->
+      <section class="recent-searches-section" aria-label="Recent Searches">
+        <h2 class="section-title-hidden">Recent Searches</h2>
+        <div class="chips-container" id="recent-chips" aria-live="polite">
+          <!-- Chips injected dynamically -->
+        </div>
+      </section>
+
+      <!-- Status Indicator (Loading/Error) -->
+      <div class="status-panel" id="status-panel" aria-live="assertive" hidden>
+        <div class="spinner" id="loading-spinner"></div>
+        <p class="status-text" id="status-text"></p>
+      </div>
+
+      <!-- EXPLORE MODE UI -->
+      <section class="explore-mode-view" id="explore-view" aria-label="Explore Facts Grid">
+        <div class="cards-grid" id="explore-grid">
+          <!-- Dynamic 3D Glassmorphism Cards injected here -->
+          <div class="card-placeholder-text">
+            Search a topic above to explore verified niche facts.
+          </div>
+        </div>
+      </section>
+
+      <!-- TRIVIA MODE UI -->
+      <section class="trivia-mode-view" id="trivia-view" aria-label="Trivia Game" hidden>
+        <div class="trivia-container liquid-glass">
+          
+          <!-- Scoreboard -->
+          <div class="scoreboard">
+            <div class="score-stat">
+              <span class="stat-label">Score</span>
+              <span class="stat-value" id="trivia-score">0/0</span>
+            </div>
+            <div class="score-stat">
+              <span class="stat-label">Streak</span>
+              <span class="stat-value" id="trivia-streak">0</span>
+            </div>
+            <div class="score-stat">
+              <span class="stat-label">Accuracy</span>
+              <span class="stat-value" id="trivia-accuracy">0%</span>
+            </div>
+            <div class="score-stat">
+              <span class="stat-label">High Score</span>
+              <span class="stat-value" id="trivia-high-score">0</span>
+            </div>
+          </div>
+
+          <!-- Trivia Card Body -->
+          <div class="trivia-card" id="trivia-card">
+            <div class="trivia-placeholder-text">
+              Enter a search topic to start the quiz.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Collapsible Citation Drawer -->
+  <section class="citation-drawer-section" aria-label="Citations and Sources">
+    <div class="drawer-header">
+      <button class="btn-drawer-toggle" id="drawer-toggle-btn" aria-expanded="false" aria-controls="drawer-content">
+        <span class="toggle-icon">▲</span> View Sources (<span id="source-count">0</span>)
+      </button>
+    </div>
+    <div class="drawer-content" id="drawer-content" hidden>
+      <div class="drawer-inner-container">
+        <table class="citations-table">
+          <thead>
+            <tr>
+              <th scope="col">Fact Hook</th>
+              <th scope="col">Source Publication</th>
+              <th scope="col">Link</th>
+              <th scope="col">Retrieved Date</th>
+            </tr>
+          </thead>
+          <tbody id="citations-tbody">
+            <tr>
+              <td colspan="4" class="no-citations-text">No sources loaded. Perform a topic search to view citations.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Footer Section with Mux HLS Streaming Video -->
+  <footer class="footer-cta" role="contentinfo">
+    <div class="cta-video-container">
+      <video id="cta-stream-video" class="cta-video" muted loop playsinline autoplay aria-hidden="true"></video>
+      <div class="cta-overlay" aria-hidden="true"></div>
+    </div>
+    <div class="footer-container">
+      <div class="footer-logo">FACTNETIC</div>
+      <p class="footer-tagline">Revealing the world's hidden anomalies, one topic at a time.</p>
+      <p class="footer-copyright">&copy; 2026 FACTNETIC. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Script entry point -->
+  <script src="/js/hls.min.js"></script>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>
