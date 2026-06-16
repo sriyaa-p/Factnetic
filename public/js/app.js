@@ -58,8 +58,9 @@ const loadingMessages = [
 let _loadingMsgInterval = null;
 
 function startLoadingMessages() {
+  stopLoadingMessages();
   let idx = 0;
-  statusText.style.transition = 'opacity 0.5s ease';
+  statusText.style.transition = 'opacity 0.25s ease';
   statusText.textContent = loadingMessages[idx];
   statusText.style.opacity = '1';
 
@@ -69,8 +70,8 @@ function startLoadingMessages() {
       idx = (idx + 1) % loadingMessages.length;
       statusText.textContent = loadingMessages[idx];
       statusText.style.opacity = '1';
-    }, 500);
-  }, 1800);
+    }, 250);
+  }, 800);
 }
 
 function stopLoadingMessages() {
@@ -709,7 +710,7 @@ function initHlsStream() {
   }
 
   const streamUrl = "https://stream.mux.com/8wrHPCX2dC3msyYU9ObwqNdm00u3ViXvOSHUMRYSEe5Q.m3u8";
-  
+
   if (Hls.isSupported()) {
     const hls = new Hls({
       maxMaxBufferLength: 10,
