@@ -28,6 +28,7 @@ const recentChipsContainer = document.getElementById("recent-chips");
 const statusPanel = document.getElementById("status-panel");
 const statusText = document.getElementById("status-text");
 const loadingSpinner = document.getElementById("loading-spinner");
+const loadingShimmer = document.getElementById("loading-shimmer");
 const exploreView = document.getElementById("explore-view");
 const exploreGrid = document.getElementById("explore-grid");
 const triviaView = document.getElementById("trivia-view");
@@ -41,6 +42,42 @@ const drawerContent = document.getElementById("drawer-content");
 const citationsTbody = document.getElementById("citations-tbody");
 const sourceCountEl = document.getElementById("source-count");
 const ctaVideo = document.getElementById("cta-stream-video");
+
+// --- Loading Message Rotation ---
+const loadingMessages = [
+  "Searching trusted sources...",
+  "Curating lesser-known insights...",
+  "Verifying historical references...",
+  "Cross-checking citations...",
+  "Exploring obscure knowledge...",
+  "Assembling surprising discoveries...",
+  "Analyzing niche information...",
+  "Preparing your results..."
+];
+
+let _loadingMsgInterval = null;
+
+function startLoadingMessages() {
+  let idx = 0;
+  statusText.style.transition = 'opacity 0.5s ease';
+  statusText.textContent = loadingMessages[idx];
+  statusText.style.opacity = '1';
+
+  _loadingMsgInterval = setInterval(() => {
+    statusText.style.opacity = '0';
+    setTimeout(() => {
+      idx = (idx + 1) % loadingMessages.length;
+      statusText.textContent = loadingMessages[idx];
+      statusText.style.opacity = '1';
+    }, 500);
+  }, 1800);
+}
+
+function stopLoadingMessages() {
+  clearInterval(_loadingMsgInterval);
+  _loadingMsgInterval = null;
+  statusText.style.opacity = '1';
+}
 
 // --- Initialization ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -185,10 +222,11 @@ function updateHighScore(newScore) {
 async function performSearch(topic) {
   state.currentTopic = topic;
 
-  // Show Loading Spinner
+  // Show loading state
   statusPanel.hidden = false;
-  loadingSpinner.hidden = false;
-  statusText.textContent = `Gathering verified facts on "${topic}" using Gemini...`;
+  loadingShimmer.hidden = false;
+  btnSubmit.disabled = true;
+  startLoadingMessages();
 
   // Hide panels during load
   exploreGrid.innerHTML = "";
@@ -210,7 +248,9 @@ async function performSearch(topic) {
 
     saveRecentSearch(topic);
 
-    // Hide status panel on success
+    // Clear loading state on success
+    stopLoadingMessages();
+    btnSubmit.disabled = false;
     statusPanel.hidden = true;
 
     // Populate Citations
@@ -225,13 +265,15 @@ async function performSearch(topic) {
 
   } catch (err) {
     console.error("Search Error:", err);
+    stopLoadingMessages();
+    btnSubmit.disabled = false;
     showError(err.message || "An unexpected error occurred. Please try again.");
   }
 }
 
 function showError(msg) {
   statusPanel.hidden = false;
-  loadingSpinner.hidden = true;
+  loadingShimmer.hidden = true;
   statusText.innerHTML = `<span style="color: #ff3b30; font-weight: 500;">Error:</span> ${msg}`;
 }
 

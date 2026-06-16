@@ -417,14 +417,45 @@ body {
   margin: 40px 0;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 2px solid rgba(255, 255, 255, 0.05);
-  border-top-color: var(--accent-color);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+/* Loading shimmer line with pulsing dot */
+.loading-shimmer-line {
+  position: relative;
+  width: 200px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: visible;
 }
+
+.loading-shimmer-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  animation: shimmerSlide 1.8s ease-in-out infinite;
+}
+
+.loading-shimmer-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  animation: dotPulse 1.8s ease-in-out infinite;
+}
+
+/* Legacy spinner hidden */
+.spinner { display: none; }
 
 .status-text {
   font-size: 1rem;
@@ -989,6 +1020,18 @@ body {
   }
 }
 
+@keyframes shimmerSlide {
+  0%   { left: -60%; opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { left: 110%; opacity: 0; }
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(0.8); }
+  50%       { opacity: 0.9; transform: translate(-50%, -50%) scale(1.2); }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1134,5 +1177,15 @@ body {
   .spinner {
     animation: spin 3s linear infinite;
     /* slower spin */
+  }
+
+  .loading-shimmer-line::after {
+    animation: none;
+    opacity: 0.3;
+  }
+
+  .loading-shimmer-dot {
+    animation: none;
+    opacity: 0.5;
   }
 }
