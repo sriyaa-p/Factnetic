@@ -10,6 +10,8 @@ const cacheService = require("./services/cacheService");
 const geminiService = require("./services/geminiService");
 
 const app = express();
+app.set("trust proxy", 1);
+
 const PORT = process.env.PORT || 3000;
 
 // Apply Helmet to set secure HTTP headers
