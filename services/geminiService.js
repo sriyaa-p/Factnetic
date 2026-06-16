@@ -186,7 +186,7 @@ async function fetchNicheFacts(topic) {
 
   // 4. Never call Gemini if USE_MOCK_DATA=true
   if (process.env.USE_MOCK_DATA === "true") {
-    return MOCK_FACTS[normalizedTopic] || getGenericFallbackFacts(topic);
+    return MOCK_FACTS[normalizedTopic] || [];
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -194,58 +194,40 @@ async function fetchNicheFacts(topic) {
   // If API key is missing, go straight to fallback
   if (!apiKey || apiKey === "your_gemini_api_key_here") {
     console.warn("GEMINI_API_KEY is not configured. Using fallback mock data.");
-    return MOCK_FACTS[normalizedTopic] || getGenericFallbackFacts(topic);
+    return MOCK_FACTS[normalizedTopic] || [];
   }
 
-  // Log [Gemini Call] right before any Gemini API call
-  console.log("[Gemini Call]");
+  console.log("[Gemini Call]", topic);
 
   try {
     const ai = new GoogleGenAI({ apiKey });
-    const prompt = `Find 5 extremely niche, verified, lesser-known facts about ${topic}. Return structured JSON with citations.`;
+    const prompt = `Find 5 extremely niche, verified, lesser-known facts about "${topic}".
+
+Requirements:
+- Facts must be surprising and verifiable.
+- Include real source URLs when available.
+- Avoid generic facts.
+- Return ONLY valid JSON.
+- Do not include markdown fences.
+
+Return exactly:
+
+[
+  {
+    "fact": "string",
+    "hint": "string",
+    "isTrue": true,
+    "distractor": "string",
+    "source": "https://...",
+    "citation": "Source Name"
+  }
+]`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
       config: {
-        // Enable Google Search Grounding
         tools: [{ googleSearch: {} }],
-        // Enforce Structured JSON Output matching build specifications
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "array",
-          description: "An array of 5 niche facts",
-          items: {
-            type: "object",
-            properties: {
-              fact: {
-                type: "string",
-                description: "The niche, verified fun fact text."
-              },
-              hint: {
-                type: "string",
-                description: "A mysterious hook, question, or clue to display on the card front (e.g. 'Did you know this about...')."
-              },
-              isTrue: {
-                type: "boolean",
-                description: "Must be true. Used for true/false trivia validation."
-              },
-              distractor: {
-                type: "string",
-                description: "A plausible but completely false alternative statement related to this fact."
-              },
-              source: {
-                type: "string",
-                description: "The primary source URL from Google Search Grounding (must be a valid URL starting with http/https)."
-              },
-              citation: {
-                type: "string",
-                description: "Short title or name of the source website/publication (e.g. 'NASA', 'Nature Journal')."
-              }
-            },
-            required: ["fact", "hint", "isTrue", "distractor", "source", "citation"]
-          }
-        }
       }
     });
 
@@ -253,16 +235,28 @@ async function fetchNicheFacts(topic) {
       throw new Error("Empty response received from Gemini API.");
     }
 
-    const facts = JSON.parse(response.text);
+    const cleaned = response.text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    let facts;
+    try {
+      facts = JSON.parse(cleaned);
+    } catch (parseError) {
+      throw new Error(`Failed to parse Gemini JSON response: ${parseError.message}`);
+    }
+
     if (!Array.isArray(facts) || facts.length === 0) {
       throw new Error("Gemini API response did not parse as a non-empty array.");
     }
 
+    console.log("[Gemini Success]", topic);
     return facts;
   } catch (error) {
     console.error(`Gemini API Error for topic '${topic}':`, error.message);
-    console.log("Falling back to local mock data.");
-    return MOCK_FACTS[normalizedTopic] || getGenericFallbackFacts(topic);
+    console.log("[Gemini Fallback]", topic);
+    return MOCK_FACTS[normalizedTopic] || [];
   }
 }
 
