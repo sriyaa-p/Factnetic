@@ -2,6 +2,9 @@
 
 FACTNETIC is a production-ready, AI-powered web application that allows users to search any topic and discover highly niche, lesser-known fun facts. Powered by Google Gemini's Search Grounding, the app brings real, verified, and bizarre knowledge straight from the web.
 
+### Limit : 
+Search Grounding to deliver verified niche facts, currently operating under the Gemini free-tier quota of 20 API requests per day.
+
 ---
 
 ## Features
